@@ -1,56 +1,43 @@
 close all; clear all;
-loadspice("lab1-exp3.txt");
+loadspice("data/exp3.txt");
 
 v_in = v1;
-I2 = V2 * 1e6;
-I3 = V3 * 1e6;
-I4 = V4 * 1e6;
-I5 = V5 * 1e6;
+
+% I1 = I1 * 1e6;
+% I2 = I2 * 1e6;
+% I3 = I3 * 1e6;
+% I4 = I4 * 1e6;
+ 
+S1 = [I1(1,1) I2(1,1) I3(1,1) I4(1,1)]; % Different branches, same voltage
+S2 = [I1(1,2) I2(1,2) I3(1,2) I4(1,2)];
+S3 = [I1(1,3) I2(1,3) I3(1,3) I4(1,3)];
 
 f = figure;
 
 % Experimental (simulated)
-semilogy([1:5], I2(238,:), "r.", "DisplayName", "Current through branch 1");
+semilogy([1:4], S1, "r.", "DisplayName", "Voltage = 1V", "MarkerSize", 12);
 hold on;
-semilogy(v_in, I3(238,:), "g.", "DisplayName", "Current through branch 2");
-semilogy(v_in, I4(238,:), "b.", "DisplayName", "Current through branch 3");
-semilogy(v_in, I5(238,:), "m.", "DisplayName", "Current through branch 4");
+semilogy([1:4], S2, "g.", "DisplayName", "Voltage = 2V", "MarkerSize", 12);
+semilogy([1:4], S3, "b.", "DisplayName", "Voltage = 3V", "MarkerSize", 12);
 
-% disp(v_in);
-% disp(I2(238,:));
-[first, last, m_2, b_2, n] = linefit(v_in, I2(238,:), 5e-4);
-[first, last, m_3, b_3, n] = linefit(v_in, I3(238,:), 5e-4);
-[first, last, m_4, b_4, n] = linefit(v_in, I4(238,:), 5e-4);
-[first, last, m_5, b_5, n] = linefit(v_in, I5(238,:), 5e-4);
+colors = ["r-" "g-" "b-"];
+for v=1:3
+    i = [];
+    for b=1:4
+        i = [i; ((.5)^(b)) * (v/10000)];
+    end
+    plot([1:4], i, colors(v), "DisplayName", sprintf("Theoretical (V = %dV)", v)); % "HandleVisibility", "off");
+end
 
-% Best Fit
-semilogy(v_in, m_2*v_in + b_2, 'r-', "DisplayName", "Best Fit (Branch 1)");
-semilogy(v_in, m_3*v_in + b_3, 'g-', "DisplayName", "Best Fit (Branch 2)");
-semilogy(v_in, m_4*v_in + b_4, 'b-', "DisplayName", "Best Fit (Branch 3)");
-semilogy(v_in, m_5*v_in + b_5, 'm-', "DisplayName", "Best Fit (Branch 4)");
+legend("location", "NorthEast");
+xlabel("Branch");
+ylabel("Current Out (A)");
 
-legend("location", "NorthWest");
-title("R-2R Ladder Network DC-DC Sweep");
-xlabel("Voltage In (V)");
-ylabel("Current Out (\mu A)");
-% gtext(sprintf("Slope: %f", m_1));
-% gtext(sprintf("Slope: %f", m_2));
+xticks([1 2 3 4]);
+yticks([1e-5 1e-4]);
 
-grid on;
+xlim([.5 4.5]);
+ylim([5e-6 2e-4]);
+
+set(gca, 'YGrid', 'on', 'XGrid', 'off')
 hold off;
-
-% ratio = [];
-% for i=1:size(v_out, 1)
-%     [first, last, m, b, n] = linefit(i1, v_out(i,:), 5e-4);
-%     ratio = [ratio; m];
-% end
-% 
-% f2 = figure;
-% hold on;
-% histogram(ratio);
-% set(gca, "xtick", [0.3738:.0001:.376]);
-% xtickangle(45)
-% xlabel("Voltage Divider Ratio");
-% ylabel("Count")
-% title("Histogram Plot of Monte Carlo Simulation Results")
-% hold off;
